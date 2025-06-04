@@ -383,8 +383,38 @@ function LeftPanel() {
 // Center Panel (Code and Ladder Logic)
 
 // Center Panel (Code and Ladder Logic)
+// Updated CenterPanel component to display the PDF directly
+
+// Updated CenterPanel component to match the PDF viewer interface in the screenshot
+
+
 function CenterPanel() {
   const [activeTab, setActiveTab] = useState('PLC_PRG');
+  const [pdfPage, setPdfPage] = useState(1);
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const totalPages = 2; // We have 2 images
+  
+  // Base64 encoded image data - this would be replaced with your actual images
+  // You would typically import these images instead of using base64
+  const images = {
+    1: "ladder_diagram_page1.png", // Replace with actual image path or import
+    2: "ladder_diagram_page2.png"  // Replace with actual image path or import
+  };
+  
+  // Function to change pages
+  const changePage = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setPdfPage(newPage);
+    }
+  };
+  
+  // Function to handle zoom
+  const changeZoom = (delta) => {
+    const newZoom = zoomLevel + delta;
+    if (newZoom >= 50 && newZoom <= 200) {
+      setZoomLevel(newZoom);
+    }
+  };
   
   return (
     <div className="center-panel">
@@ -419,7 +449,6 @@ function CenterPanel() {
             <div className="code-line indent">LEVEL_B: <span className="type">BOOL</span>;</div>
             <div className="code-line indent">VALVE_2: <span className="type">BOOL</span>;</div>
             
-            {/* New variables for traffic control system */}
             <div className="code-line indent">U1, U2, U3, U4: <span className="type">INT</span>; <span className="comment">// Distances from ultrasonic sensors (cm)</span></div>
             <div className="code-line indent">threshold: <span className="type">INT</span> := 50; <span className="comment">// Distance threshold in cm</span></div>
             <div className="code-line indent">LaneGreen: <span className="type">INT</span> := 1; <span className="comment">// Current active lane (1 to 4)</span></div>
@@ -430,7 +459,6 @@ function CenterPanel() {
             <div className="code-line indent">S1, S2, S3, S4: <span className="type">INT</span>; <span className="comment">// Servo angles: 0 = Closed, 90 = Open</span></div>
             <div className="code-line"><span className="keyword">END_VAR</span></div>
             
-            {/* Timer Logic */}
             <div className="code-line indent"><span className="comment">// === Timer Logic ===</span></div>
             <div className="code-line indent">TimeCounter := TIME(); <span className="comment">// Get system time</span></div>
             <div className="code-line indent"><span className="keyword">IF</span> (TimeCounter - LastSwitch) {'>'} SwitchInterval <span className="keyword">THEN</span></div>
@@ -441,206 +469,194 @@ function CenterPanel() {
             <div className="code-line indent indent">LastSwitch := TimeCounter;</div>
             <div className="code-line indent"><span className="keyword">END_IF</span></div>
             
-            {/* Light Logic */}
             <div className="code-line indent"><span className="comment">// === Traffic Light Logic ===</span></div>
             <div className="code-line indent">L1 := <span className="keyword">IF</span> LaneGreen = 1 <span className="keyword">THEN</span> 'GREEN' <span className="keyword">ELSE</span> 'RED' <span className="keyword">END_IF</span>;</div>
             <div className="code-line indent">L2 := <span className="keyword">IF</span> LaneGreen = 2 <span className="keyword">THEN</span> 'GREEN' <span className="keyword">ELSE</span> 'RED' <span className="keyword">END_IF</span>;</div>
             <div className="code-line indent">L3 := <span className="keyword">IF</span> LaneGreen = 3 <span className="keyword">THEN</span> 'GREEN' <span className="keyword">ELSE</span> 'RED' <span className="keyword">END_IF</span>;</div>
             <div className="code-line indent">L4 := <span className="keyword">IF</span> LaneGreen = 4 <span className="keyword">THEN</span> 'GREEN' <span className="keyword">ELSE</span> 'RED' <span className="keyword">END_IF</span>;</div>
-            
-            {/* Servo Control Logic */}
-            <div className="code-line indent"><span className="comment">// === Servo Control Logic ===</span></div>
-            <div className="code-line indent"><span className="keyword">IF</span> (U1 {'<'} threshold) <span className="keyword">AND</span> (L1 = 'GREEN') <span className="keyword">THEN</span></div>
-            <div className="code-line indent indent">S1 := 90;</div>
-            <div className="code-line indent"><span className="keyword">ELSE</span></div>
-            <div className="code-line indent indent">S1 := 0;</div>
-            <div className="code-line indent"><span className="keyword">END_IF</span></div>
-            
-            <div className="code-line indent"><span className="keyword">IF</span> (U2 {'<'} threshold) <span className="keyword">AND</span> (L2 = 'GREEN') <span className="keyword">THEN</span></div>
-            <div className="code-line indent indent">S2 := 90;</div>
-            <div className="code-line indent"><span className="keyword">ELSE IF</span> (U2 {'>='} threshold) <span className="keyword">AND</span> (L1 = 'RED') <span className="keyword">THEN</span></div>
-            <div className="code-line indent indent">S2 := 0;</div>
-            <div className="code-line indent"><span className="keyword">END_IF</span></div>
           </div>
         </div>
         
         <div className="ladder-editor">
-          <div className="ladder-toolbar">
-            <div className="zoom">100 %</div>
+          {/* PDF Viewer Navigation Toolbar - Matching the screenshot */}
+          <div className="pdf-toolbar">
+            <div className="pdf-navigation">
+              <button 
+                className="nav-button"
+                onClick={() => changePage(pdfPage - 1)}
+                disabled={pdfPage === 1}
+              >
+                Previous
+              </button>
+              
+              <div className="page-indicator">
+                Page {pdfPage} of {totalPages}
+              </div>
+              
+              <button 
+                className="nav-button"
+                onClick={() => changePage(pdfPage + 1)}
+                disabled={pdfPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+            
             <div className="zoom-controls">
-              <button className="zoom-button">🔍-</button>
-              <button className="zoom-button">🔍+</button>
+              <div className="zoom-indicator">{zoomLevel} %</div>
+              
+              <button className="zoom-button zoom-out" onClick={() => changeZoom(-10)}>
+                <div className="zoom-button-content">
+                  <span className="magnifier">🔍</span>
+                  <span className="zoom-sign">−</span>
+                </div>
+              </button>
+              
+              <button className="zoom-button zoom-in" onClick={() => changeZoom(10)}>
+                <div className="zoom-button-content">
+                  <span className="magnifier">🔍</span>
+                  <span className="zoom-sign">+</span>
+                </div>
+              </button>
             </div>
           </div>
           
-          {/* Traffic Control Ladder Logic */}
-          <div className="ladder-content">
-            {/* Image 1 - First Rung */}
-            <div className="rung">
-              <div className="rung-number">1</div>
-              <div className="ladder-diagram">
-                <div className="ladder-row">
-                  <div className="ladder-element">U1 {'<'} 50</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element">L1 = GREEN</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element function-block">
-                    MOV<br/>
-                    90<br/>
-                    S1
-                  </div>
-                  <div className="ladder-wire">───</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Image 1 - Second Rung */}
-            <div className="rung">
-              <div className="rung-number">2</div>
-              <div className="ladder-diagram">
-                <div className="ladder-row">
-                  <div className="ladder-element">U2 {'<'} 50</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element">L2 = GREEN</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element function-block">
-                    MOV<br/>
-                    90<br/>
-                    S2
-                  </div>
-                  <div className="ladder-wire">───</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Image 1 - Third Rung */}
-            <div className="rung">
-              <div className="rung-number">3</div>
-              <div className="ladder-diagram">
-                <div className="ladder-row">
-                  <div className="ladder-element">U3 {'<'} 50</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element">L3 = GREEN</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element function-block">
-                    MOV<br/>
-                    90<br/>
-                    S3
-                  </div>
-                  <div className="ladder-wire">───</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Image 1 - Fourth Rung */}
-            <div className="rung">
-              <div className="rung-number">4</div>
-              <div className="ladder-diagram">
-                <div className="ladder-row">
-                  <div className="ladder-element">U4 {'<'} 50</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element">L4 = GREEN</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element function-block">
-                    MOV<br/>
-                    90<br/>
-                    S4
-                  </div>
-                  <div className="ladder-wire">───</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Image 2 - First Rung */}
-            <div className="rung">
-              <div className="rung-number">5</div>
-              <div className="ladder-diagram">
-                <div className="ladder-row">
-                  <div className="ladder-element">U2 {'>='} 50</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element">L1 = RED</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element function-block">
-                    MOV<br/>
-                    0<br/>
-                    S2
-                  </div>
-                  <div className="ladder-wire">───</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Image 2 - Second Rung */}
-            <div className="rung">
-              <div className="rung-number">6</div>
-              <div className="ladder-diagram">
-                <div className="ladder-row">
-                  <div className="ladder-element">U3 {'>='} 50</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element">L2 = RED</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element function-block">
-                    MOV<br/>
-                    0<br/>
-                    S3
-                  </div>
-                  <div className="ladder-wire">───</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Image 2 - Third Rung */}
-            <div className="rung">
-              <div className="rung-number">7</div>
-              <div className="ladder-diagram">
-                <div className="ladder-row">
-                  <div className="ladder-element">U4 {'>='} 50</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element">L3 = RED</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element function-block">
-                    MOV<br/>
-                    0<br/>
-                    S3
-                  </div>
-                  <div className="ladder-wire">───</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Image 2 - Fourth Rung */}
-            <div className="rung">
-              <div className="rung-number">8</div>
-              <div className="ladder-diagram">
-                <div className="ladder-row">
-                  <div className="ladder-element">U4 {'>='} 50</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element">L4 = RED</div>
-                  <div className="ladder-wire">─┤ ├─</div>
-                  <div className="ladder-element function-block">
-                    MOV<br/>
-                    0<br/>
-                    S4
-                  </div>
-                  <div className="ladder-wire">───</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="ladder-footer">
-            <div className="zoom">100 %</div>
-            <div className="zoom-controls">
-              <button className="zoom-button">🔍-</button>
-              <button className="zoom-button">🔍+</button>
+          {/* PDF Display Area */}
+          <div className="pdf-display">
+            <div 
+              className="pdf-content"
+              style={{ transform: `scale(${zoomLevel / 100})` }}
+            >
+              {/* Display the current ladder diagram image */}
+              <img 
+                src={images[pdfPage]} 
+                alt={`Ladder Logic Diagram Page ${pdfPage}`}
+                className="pdf-image"
+              />
             </div>
           </div>
         </div>
       </div>
+      
+      <style jsx>{`
+        /* Ladder editor takes the remaining height */
+        .ladder-editor {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          overflow: hidden;
+        }
+        
+        /* PDF Viewer Styles - Matching the screenshot */
+        .pdf-toolbar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 6px 10px;
+          background-color: #f0f0f0;
+          border-bottom: 1px solid #ccc;
+        }
+        
+        .pdf-navigation {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        
+        .nav-button {
+          padding: 3px 10px;
+          background-color: white;
+          border: 1px solid #ccc;
+          border-radius: 2px;
+          font-size: 12px;
+          cursor: pointer;
+        }
+        
+        .nav-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        
+        .page-indicator {
+          font-size: 12px;
+          color: #333;
+        }
+        
+        .zoom-controls {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        
+        .zoom-indicator {
+          font-size: 12px;
+          color: #333;
+        }
+        
+        .zoom-button {
+          width: 40px;
+          height: 30px;
+          background-color: white;
+          border: 1px solid #ccc;
+          border-radius: 2px;
+          position: relative;
+          cursor: pointer;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        
+        .zoom-button-content {
+          position: relative;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .magnifier {
+          position: absolute;
+          font-size: 16px;
+          left: 5px;
+          top: 5px;
+          color: #0078d7;
+        }
+        
+        .zoom-sign {
+          position: absolute;
+          font-size: 16px;
+          right: 10px;
+          top: 5px;
+          font-weight: bold;
+          color: #0078d7;
+        }
+        
+        /* PDF Display Area */
+        .pdf-display {
+          flex: 1;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background-color: #f0f0f0;
+          overflow: auto;
+          padding: 20px;
+        }
+        
+        .pdf-content {
+          transform-origin: center;
+          transition: transform 0.2s ease;
+        }
+        
+        .pdf-image {
+          display: block;
+          max-width: 100%;
+          max-height: 100%;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          background-color: white;
+          margin-top: 70vh;
+        }
+      `}</style>
     </div>
   );
 }
-
 // Right Panel (Visualization)
 
 // Updated Right Panel (Visualization) with interactive buttons
@@ -658,6 +674,14 @@ function RightPanel() {
     indicator5: false,
     indicator6: false,
     indicator7: false
+  });
+  
+  // State for sensor distances
+  const [distances, setDistances] = useState({
+    sensor1: '--',
+    sensor2: '--',
+    sensor3: '--',
+    sensor4: '--'
   });
   
   // State for serial port
@@ -681,9 +705,106 @@ function RightPanel() {
       setMessage('Serial connected - Ready to send commands');
       
       console.log('Connected to serial port');
+      
+      // Start reading data
+      readSerialData(port);
+      
     } catch (error) {
       console.error('Error connecting to serial port:', error);
       setMessage(`Serial error: ${error.message}`);
+    }
+  };
+  
+  // Function to read data from serial port
+  const readSerialData = async (port) => {
+    if (!port) return;
+    
+    const reader = port.readable.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+          break;
+        }
+        
+        const chunk = decoder.decode(value);
+        buffer += chunk;
+        
+        // Process complete lines
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // Keep any incomplete line
+        
+        for (const line of lines) {
+          if (line.trim()) {
+            processData(line.trim());
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error reading data:', error);
+    } finally {
+      reader.releaseLock();
+    }
+  };
+  
+  // Process incoming data
+  const processData = (data) => {
+    console.log('Received data:', data);
+    
+    // Check if this is a sensor data line (contains "Sensor")
+    if (data.includes('Sensor')) {
+      // Create a new distances object
+      const newDistances = {...distances};
+      let updated = false;
+      
+      // Parse sensor values - matches format: "Sensor 1: 78.62 cm"
+      // We use a regex that captures the number and decimal value
+      
+      // Sensor 1
+      const sensor1Match = data.match(/Sensor 1: ([\d.]+) cm/);
+      if (sensor1Match) {
+        newDistances.sensor1 = sensor1Match[1];
+        updated = true;
+      }
+      
+      // Sensor 2
+      const sensor2Match = data.match(/Sensor 2: ([\d.]+) cm/);
+      if (sensor2Match) {
+        newDistances.sensor2 = sensor2Match[1];
+        updated = true;
+      }
+      
+      // Sensor 3
+      const sensor3Match = data.match(/Sensor 3: ([\d.]+) cm/);
+      if (sensor3Match) {
+        newDistances.sensor3 = sensor3Match[1];
+        updated = true;
+      }
+      
+      // Sensor 4
+      const sensor4Match = data.match(/Sensor 4: ([\d.]+) cm/);
+      if (sensor4Match) {
+        newDistances.sensor4 = sensor4Match[1];
+        updated = true;
+      }
+      
+      // Update state if any values changed
+      if (updated) {
+        console.log('Updating distances:', newDistances);
+        setDistances(newDistances);
+      }
+    }
+    
+    // We can also check for switch state data if needed
+    if (data.includes('Switch')) {
+      // Parse switch states if needed
+      // For now, we'll just log it
+      console.log('Switch data received:', data);
+      
+      // You can add code here to update switch states if needed
     }
   };
   
@@ -728,6 +849,18 @@ function RightPanel() {
     // Send the command to the serial port
     sendCommand(command);
   };
+  
+  // For testing - simulate some distance values like your real data
+  const simulateDistances = () => {
+    const simulated = {
+      sensor1: (Math.random() * 100).toFixed(2),
+      sensor2: (Math.random() * 100).toFixed(2),
+      sensor3: (Math.random() * 100).toFixed(2),
+      sensor4: (Math.random() * 100).toFixed(2)
+    };
+    console.log('Setting simulated distances:', simulated);
+    setDistances(simulated);
+  };
 
   return (
     <div className="right-panel">
@@ -743,20 +876,20 @@ function RightPanel() {
       </div>
       
       <div className="right-panel-content">
-        {/* Connect button - required for Web Serial API */}
-        <button 
-          className="connect-button"
-          onClick={initializeSerial}
-        >
-          Connect Serial
-        </button>
+        {/* Connect buttons */}
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+          <button 
+            className="connect-button"
+            onClick={initializeSerial}
+          >
+            Connect Serial
+          </button>
+          
+          
+        </div>
         
         {/* Serial status message */}
-        {message && (
-          <div className="serial-status-banner">
-            {message}
-          </div>
-        )}
+       
         
         <div className="visualization-area">
           <div className="visualization-grid">
@@ -768,43 +901,63 @@ function RightPanel() {
             >
               <div className="command-label">M1</div>
             </div>
-            <div 
-              className={`visualization-button silver ${indicators.indicator2 ? 'active' : ''}`}
-              onClick={() => toggleIndicator('indicator2', 'S1')}
-              title="Send S1 command"
-            >
-              <div className="command-label">S1</div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div 
+                className={`visualization-button silver ${indicators.indicator2 ? 'active' : ''}`}
+                onClick={() => toggleIndicator('indicator2', 'S1')}
+                title="Send S1 command"
+              >
+                <div className="command-label">S1</div>
+              </div>
+              <div style={{ marginTop: '5px', fontSize: '12px', fontWeight: 'bold' }}>
+                {distances.sensor1} cm
+              </div>
             </div>
             <div 
               className={`visualization-button ${indicators.indicator1 ? 'green' : 'amber'} on`}
             ></div>
             
             {/* Row 2 - S2 and S3 */}
-            <div 
-              className={`visualization-button silver ${indicators.indicator3 ? 'active' : ''}`}
-              onClick={() => toggleIndicator('indicator3', 'S2')}
-              title="Send S2 command"
-            >
-              <div className="command-label">S2</div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div 
+                className={`visualization-button silver ${indicators.indicator3 ? 'active' : ''}`}
+                onClick={() => toggleIndicator('indicator3', 'S2')}
+                title="Send S2 command"
+              >
+                <div className="command-label">S2</div>
+              </div>
+              <div style={{ marginTop: '5px', fontSize: '12px', fontWeight: 'bold' }}>
+                {distances.sensor2} cm
+              </div>
             </div>
-            <div 
-              className={`visualization-button silver ${indicators.indicator4 ? 'active' : ''}`}
-              onClick={() => toggleIndicator('indicator4', 'S3')}
-              title="Send S3 command"
-            >
-              <div className="command-label">S3</div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div 
+                className={`visualization-button silver ${indicators.indicator4 ? 'active' : ''}`}
+                onClick={() => toggleIndicator('indicator4', 'S3')}
+                title="Send S3 command"
+              >
+                <div className="command-label">S3</div>
+              </div>
+              <div style={{ marginTop: '5px', fontSize: '12px', fontWeight: 'bold' }}>
+                {distances.sensor3} cm
+              </div>
             </div>
             <div 
               className={`visualization-button ${indicators.indicator2 ? 'green' : 'amber'} on`}
             ></div>
             
             {/* Row 3 - S4 */}
-            <div 
-              className={`visualization-button silver ${indicators.indicator5 ? 'active' : ''}`}
-              onClick={() => toggleIndicator('indicator5', 'S4')}
-              title="Send S4 command"
-            >
-              <div className="command-label">S4</div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div 
+                className={`visualization-button silver ${indicators.indicator5 ? 'active' : ''}`}
+                onClick={() => toggleIndicator('indicator5', 'S4')}
+                title="Send S4 command"
+              >
+                <div className="command-label">S4</div>
+              </div>
+              <div style={{ marginTop: '5px', fontSize: '12px', fontWeight: 'bold' }}>
+                {distances.sensor4} cm
+              </div>
             </div>
             <div 
               className={`visualization-button ${indicators.indicator5 ? 'green' : 'amber'} on`}
@@ -874,21 +1027,32 @@ function RightPanel() {
             <div className="property-name">Serial Port</div>
             <div className="property-value">{serialPort ? 'Connected' : 'Disconnected'}</div>
           </div>
+          <div className="property-row">
+            <div className="property-name">Sensor 1</div>
+            <div className="property-value">{distances.sensor1} cm</div>
+          </div>
+          <div className="property-row">
+            <div className="property-name">Sensor 2</div>
+            <div className="property-value">{distances.sensor2} cm</div>
+          </div>
+          <div className="property-row">
+            <div className="property-name">Sensor 3</div>
+            <div className="property-value">{distances.sensor3} cm</div>
+          </div>
+          <div className="property-row">
+            <div className="property-name">Sensor 4</div>
+            <div className="property-value">{distances.sensor4} cm</div>
+          </div>
         </div>
       </div>
       
       <style jsx>{`
-        .connect-button {
-          margin-bottom: 10px;
+        .connect-button, .test-button {
           padding: 5px 10px;
           background-color: #f0f0f0;
           border: 1px solid #ccc;
           border-radius: 3px;
           cursor: pointer;
-        }
-        
-        .connect-button:hover {
-          background-color: #e0e0e0;
         }
         
         .serial-status-banner {
@@ -900,33 +1064,6 @@ function RightPanel() {
           font-size: 12px;
           color: #333;
           text-align: center;
-        }
-        
-        .visualization-button {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-        }
-        
-        .command-label {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          color: #333;
-          font-weight: bold;
-          font-size: 14px;
-          text-shadow: 0 1px 1px rgba(255,255,255,0.7);
-          pointer-events: none;
-        }
-        
-        .property-row {
-          display: flex;
-          justify-content: space-between;
-          padding: 5px 0;
-          border-bottom: 1px solid #eee;
-          font-size: 12px;
         }
       `}</style>
     </div>
@@ -991,7 +1128,15 @@ styles.textContent = `
   max-height: 100%;
   overflow-y: auto;
 }
+.command-label{
+    display: flex;
+    justify-content: center;
+    /* margin-left: 28px; */
+    align-items: center;
+    text-align: center;
+        margin-top: 25px;
 
+}
 /* Ensure line numbers are properly displayed */
 .line-numbers {
   display: flex;
