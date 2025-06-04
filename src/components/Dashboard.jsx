@@ -387,7 +387,6 @@ function LeftPanel() {
 
 // Updated CenterPanel component to match the PDF viewer interface in the screenshot
 
-
 function CenterPanel() {
   const [activeTab, setActiveTab] = useState('PLC_PRG');
   const [pdfPage, setPdfPage] = useState(1);
@@ -397,8 +396,8 @@ function CenterPanel() {
   // Base64 encoded image data - this would be replaced with your actual images
   // You would typically import these images instead of using base64
   const images = {
-    1: "ladder_diagram_page1.png", // Replace with actual image path or import
-    2: "ladder_diagram_page2.png"  // Replace with actual image path or import
+    1: "/ladder_diagram_page1.png", // Replace with actual image path or import
+    2: "/ladder_diagram_page2.png"  // Replace with actual image path or import
   };
   
   // Function to change pages
