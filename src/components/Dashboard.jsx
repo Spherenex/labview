@@ -1,5 +1,6 @@
 import { useState,useEffect } from 'react';
-
+  import page1Image from '../assets/ladder_diagram_page1.png';
+  import page2Image from '../assets/ladder_diagram_page2.png';
 // Main component
 function CodeSysClone() {
   return (
@@ -378,6 +379,7 @@ function LeftPanel() {
   );
 }
 
+  
 // Center Panel (Code and Ladder Logic)
 
 // Center Panel (Code and Ladder Logic)
@@ -395,11 +397,11 @@ function CenterPanel() {
   
   // Base64 encoded image data - this would be replaced with your actual images
   // You would typically import these images instead of using base64
+ 
   const images = {
-    1: "/ladder_diagram_page1.png", // Replace with actual image path or import
-    2: "/ladder_diagram_page2.png"  // Replace with actual image path or import
+    1: page1Image,
+    2: page2Image
   };
-  
   // Function to change pages
   const changePage = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
